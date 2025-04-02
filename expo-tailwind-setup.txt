@@ -1,0 +1,33 @@
+Expo + Tailwind CSS Setup Steps:
+
+1. Install required packages:
+npm install nativewind
+npm install --dev tailwindcss
+
+2. Update babel.config.js:
+module.exports = {
+  plugins: ['nativewind/babel'],
+};
+
+3. Create tailwind.config.js:
+module.exports = {
+  content: [
+    './App.{js,jsx,ts,tsx}',
+    './components/**/*.{js,jsx,ts,tsx}',
+    './screens/**/*.{js,jsx,ts,tsx}'
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#1e3a8a',
+        secondary: '#10b981',
+        background: '#f9fafb',
+        text: '#1f2937'
+      }
+    }
+  }
+};
+
+4. Import NativeWind in App.js:
+import { useColorScheme } from 'react-native';
+import { TailwindProvider } from 'nativewind';
