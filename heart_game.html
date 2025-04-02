@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Hearts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+        body {
+            overflow: hidden;
+            touch-action: none;
+        }
+        #gameCanvas {
+            background-color: #f3f4f6;
+            display: block;
+            margin: 0 auto;
+        }
+        .font-pacifico { font-family: 'Pacifico', cursive; }
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 241, 242, 0.9);
+        }
+        #gameOverScreen {
+            display: none;
+        }
+    </style>
+</head>
+    <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <h1 class="text-5xl font-bold text-gray-800 mb-4">Star Collector</h1>
+    <div class="relative">
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        
+        <div id="startScreen" class="text-center">
+            <h2 class="text-3xl font-bold text-gray-700 mb-8">Catch stars (10pts) and coins (5pts)</h2>
+            <button id="startButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full text-2xl transition-all">
+                <i class="fas fa-play mr-2"></i> Start Game
+            </button>
+        </div>
+        
+        <div id="gameOverScreen" class="text-center">
+            <h2 class="text-3xl font-bold text-gray-700 mb-4">Game Over!</h2>
+            <p class="text-xl mb-6">Your score: <span id="finalScore">0</span> points</p>
+            <button id="restartButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full text-2xl transition-all">
+                <i class="fas fa-redo mr-2"></i> Play Again
+            </button>
+        </div>
+    </div>
+    <div class="mt-4 text-pink-500 text-xl">
+        Score: <span id="score">0</span>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const scoreDisplay = document.getElementById('score');
+        const finalScoreDisplay = document.getElementById('finalScore');
+
+        // Game variables
+        let score = 0;
+        let misses = 0;
+        let gameRunning = false;
+        let animationId;
+        
+        // Basket
+        const basket = {
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 30,
+            width: 100,
+            height: 20,
+            speed: 8,
+            color: '#4b5563',
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                // Basket sides
+                ctx.fillStyle = '#1f2937';
+                ctx.fillRect(this.x, this.y - 10, 10, 10);
+                ctx.fillRect(this.x + this.width - 10, this.y - 10, 10, 10);
+            },
+            move(direction) {
+                if (direction === 'left' && this.x > 0) {
+                    this.x -= this.speed;
+                } else if (direction === 'right' && this.x < canvas.width - this.width) {
+                    this.x += this.speed;
+                }
+            }
+        };
+
+        // Objects
+        let objects = [];
+        class Collectible {
+            constructor() {
+                this.x = Math.random() * (canvas.width - 30);
+                this.y = -30;
+                this.size = 15 + Math.random() * 15;
+                this.speed = 2 + Math.random() * 3;
+                this.type = Math.random() > 0.7 ? 'star' : 'coin';
+                this.color = this.type === 'star' ? '#fbbf24' : '#e5e7eb';
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                if (this.type === 'coin') {
+                    // Draw coin
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size/2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                    ctx.strokeStyle = '#9ca3af';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else {
+                    // Draw star
+                    ctx.fillStyle = this.color;
+                    drawStar(0, 0, 5, this.size/2, this.size/4);
+                }
+                
+                ctx.restore();
+            }
+            
+            update() {
+                this.y += this.speed;
+                
+                // Check collision with basket
+                if (this.y + this.size > basket.y && 
+                    this.x > basket.x - this.size && 
+                    this.x < basket.x + basket.width + this.size) {
+                    score += this.type === 'star' ? 10 : 5;
+                    scoreDisplay.textContent = score;
+                    return true; // caught
+                }
+                
+                // Check if fell off screen
+                if (this.y > canvas.height) {
+                    if (this.type === 'star') {
+                        misses++;
+                    }
+                    return true; // missed
+                }
+                
+                return false; // still falling
+            }
+        }
+
+        function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI/2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            
+            for(let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Game controls
+        let keys = {
+            left: false,
+            right: false
+        };
+
+        // Event listeners
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') keys.left = true;
+            if (e.key === 'ArrowRight') keys.right = true;
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowRight') keys.right = false;
+        });
+        
+        // Touch controls for mobile
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+            basket.x = touchX - basket.width / 2;
+            
+            // Keep basket within canvas
+            if (basket.x < 0) basket.x = 0;
+            if (basket.x > canvas.width - basket.width) basket.x = canvas.width - basket.width;
+        });
+
+        // Game functions
+        function startGame() {
+            score = 0;
+            misses = 0;
+            scoreDisplay.textContent = score;
+            objects = [];
+            gameRunning = true;
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            gameLoop();
+        }
+
+        function endGame() {
+            gameRunning = false;
+            finalScoreDisplay.textContent = score;
+            gameOverScreen.style.display = 'flex';
+            cancelAnimationFrame(animationId);
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Move basket
+            if (keys.left) basket.move('left');
+            if (keys.right) basket.move('right');
+            
+            // Draw basket
+            basket.draw();
+            
+            // Create new objects randomly
+            if (Math.random() < 0.02) {
+                objects.push(new Collectible());
+            }
+            
+            // Update and draw objects
+            for (let i = objects.length - 1; i >= 0; i--) {
+                objects[i].draw();
+                if (objects[i].update()) {
+                    objects.splice(i, 1);
+                }
+            }
+            
+            // End game if 2 stars missed
+            if (misses >= 2) {
+                endGame();
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // Draw initial screen
+        basket.draw();
+    </script>
+</body>
+</html>
