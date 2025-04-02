@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game QR Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+        <h1 class="text-2xl font-bold mb-4">Scan to Play Star Collector</h1>
+        <div id="qrCode" class="mx-auto mb-4 w-64 h-64"></div>
+        <p class="text-gray-600 mb-4">Point your phone's camera at the QR code</p>
+        <a href="heart_game.html" 
+           class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-block">
+            Play on this device
+        </a>
+    </div>
+
+    <script>
+        // Generate QR code client-side
+        const gameUrl = window.location.href.replace('qr_standalone.html', 'heart_game.html');
+        QRCode.toCanvas(document.getElementById('qrCode'), gameUrl, {
+            width: 256,
+            margin: 2
+        }, (error) => {
+            if (error) console.error(error);
+        });
+    </script>
+</body>
+</html>
