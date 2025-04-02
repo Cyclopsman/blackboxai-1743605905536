@@ -1,0 +1,25 @@
+GreenEnergySolutions Mobile App Structure:
+
+src/
+├── components/
+│   ├── HomeScreen.js
+│   ├── AboutScreen.js
+│   ├── ServicesScreen.js
+│   ├── ContactScreen.js
+│   └── common/
+│       ├── Header.js
+│       └── Footer.js
+├── navigation/
+│   └── AppNavigator.js
+├── assets/
+│   ├── images/
+│   └── fonts/
+└── screens/
+    ├── HomeStack.js
+    └── MainTabNavigator.js
+
+Color Scheme:
+- Primary: #1e3a8a (blue-900)
+- Secondary: #10b981 (green-500)
+- Background: #f9fafb (gray-50)
+- Text: #1f2937 (gray-800)
