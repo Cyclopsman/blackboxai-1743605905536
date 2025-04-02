@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        #qrCode {
+            margin: 1rem auto;
+            width: 256px;
+            height: 256px;
+        }
+        .btn {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Scan to Play Star Collector</h1>
+        <div id="qrCode"></div>
+        <p>Point your phone's camera at the QR code</p>
+        <a href="heart_game.html" class="btn">Play on this device</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameUrl = window.location.href.replace('qr_final.html', 'heart_game.html');
+            
+            try {
+                QRCode.toCanvas(document.getElementById('qrCode'), gameUrl, {
+                    width: 256,
+                    margin: 2,
+                    color: {
+                        dark: '#000000',
+                        light: '#ffffff'
+                    }
+                }, (error) => {
+                    if (error) {
+                        console.error('QR Code generation failed:', error);
+                        document.getElementById('qrCode').innerHTML = 
+                            '<p style="color:red">QR Code could not be generated</p>';
+                    }
+                });
+            } catch (e) {
+                console.error('QR Code initialization failed:', e);
+                document.getElementById('qrCode').innerHTML = 
+                    '<p style="color:red">QR Code functionality not available</p>';
+            }
+        });
+    </script>
+</body>
+</html>
