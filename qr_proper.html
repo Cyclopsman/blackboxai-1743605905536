@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game QR Code</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        #qrcode {
+            margin: 1rem auto;
+        }
+        .btn {
+            display: inline-block;
+            background: #4285f4;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scan to Play Star Collector</h1>
+        <div id="qrcode"></div>
+        <a href="heart_game.html" class="btn">Play on this device</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameUrl = window.location.href.replace('qr_proper.html', 'heart_game.html');
+            const qr = qrcode(0, 'M');
+            qr.addData(gameUrl);
+            qr.make();
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(4, 8);
+        });
+    </script>
+</body>
+</html>
