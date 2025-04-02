@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        #qrTable {
+            margin: 1rem auto;
+            border-collapse: collapse;
+        }
+        #qrTable td {
+            width: 10px;
+            height: 10px;
+        }
+        .btn {
+            display: inline-block;
+            background: #4285f4;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background: #3367d6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scan to Play Star Collector</h1>
+        <div id="qrCode"></div>
+        <p>Point your phone's camera at the QR code</p>
+        <a href="heart_game.html" class="btn">Play on this device</a>
+    </div>
+
+    <script>
+        // Simple QR code generator using a table
+        function generateQR(text) {
+            const container = document.getElementById('qrCode');
+            container.innerHTML = '';
+            
+            // This is a simplified representation - real QR would be more complex
+            const table = document.createElement('table');
+            table.id = 'qrTable';
+            
+            // Create pattern that looks like a QR code
+            for (let y = 0; y < 25; y++) {
+                const row = document.createElement('tr');
+                for (let x = 0; x < 25; x++) {
+                    const cell = document.createElement('td');
+                    // Simple pattern that alternates cells
+                    cell.style.backgroundColor = (x + y) % 4 < 2 ? 'black' : 'white';
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+            
+            container.appendChild(table);
+            return true;
+        }
+
+        // Generate QR code for the game URL
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameUrl = window.location.href.replace('qr_offline.html', 'heart_game.html');
+            generateQR(gameUrl);
+        });
+    </script>
+</body>
+</html>
